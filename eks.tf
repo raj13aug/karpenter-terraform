@@ -8,7 +8,6 @@ locals {
 
 
 module "vpc" {
-  # https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.12.0"
 
@@ -31,7 +30,6 @@ module "vpc" {
 }
 
 module "eks" {
-  # https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest
   source  = "terraform-aws-modules/eks/aws"
   version = "18.17.0"
 
@@ -44,19 +42,13 @@ module "eks" {
   # Required for Karpenter role below
   enable_irsa = true
 
-  # We will rely only on the cluster security group created by the EKS service
-  # See note below for `tags`
   create_cluster_security_group = false
   create_node_security_group    = false
 
-  # Only need one node to get Karpenter up and running.
-  # This ensures core services such as VPC CNI, CoreDNS, etc. are up and running
-  # so that Karpetner can be deployed and start managing compute capacity as required
+
   eks_managed_node_groups = {
     initial = {
       instance_types = ["t3.medium"]
-      # We don't need the node security group since we are using the
-      # cluster-created security group, which Karpenter will also use
       create_security_group                 = false
       attach_cluster_primary_security_group = true
 
@@ -72,9 +64,6 @@ module "eks" {
   }
 
   tags = {
-    # Tag node group resources for Karpenter auto-discovery
-    # NOTE - if creating multiple security groups with this module, only tag the
-    # security group that Karpenter should utilize with the following tag
     "karpenter.sh/discovery" = var.cluster_name
   }
 }
