@@ -2,7 +2,6 @@ data "aws_partition" "current" {}
 
 locals {
 
-  # Used to determine correct partition (i.e. - `aws`, `aws-gov`, `aws-cn`, etc.)
   partition = data.aws_partition.current.partition
 }
 
